@@ -17,17 +17,31 @@
         <th></th>
     </tr>
 
-@foreach (var item in Model) {
-    <tr>
-        <td>
-            @Html.DisplayFor(modelItem => item.Nome)
-        </td>
-        <td>
-            @Html.ActionLink("Editar esta pessoa", "Edit", new { id=item.Id }) |
-            @Html.ActionLink("Exibir mais informações", "Details", new { id=item.Id }) |
-            @Html.ActionLink("Excluir", "Delete", new { id=item.Id })
-        </td>
-    </tr>
-}
+    @foreach (var item in Model)
+    {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.Nome)
+            </td>
+            <td>
+                @Html.ActionLink("Editar esta pessoa", "Edit", new { id = item.Id }) |
+                @Html.ActionLink("Exibir mais informações", "Details", new { id = item.Id }) |
+                @Html.ActionLink("Excluir", "Delete", new { id = item.Id })
+            </td>
+        </tr>
+    }
 
 </table>
+
+<br />
+<p>Teste de verificação de data atual: <span id="dataAtual">X</span> <button id="buscarDataAtual" onclick="buscarData();">Buscar data atual</button></p>
+
+<p>Pessoa Aleatoria: <span id="pessoaAleatoria">X</span> <button id="buscarPessoaAleatoria" onclick="buscarPessoaAleatoria();">Buscar pessoa aleatoria</button></p>
+
+
+
+<script src="~/Scripts/jquery-1.10.2.min.js"></script>
+<script src="~/Scripts/BuscadorDeDados.js"></script>
+
+
+

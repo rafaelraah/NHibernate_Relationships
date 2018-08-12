@@ -67,18 +67,26 @@ namespace NHibernate_Relationships.Controllers
         // GET: Home/Edit/5
         public ActionResult Edit(int id)
         {
-            return View();
+            return View(NHibernateHelper.OpenSession().Get<Pessoa>(id));
         }
 
         // POST: Home/Edit/5
         [HttpPost]
-        public ActionResult Edit(int id, FormCollection collection)
+        public ActionResult Edit(Pessoa pessoa)
         {
             try
             {
                 // TODO: Add update logic here
+                using(var sessao = NHibernateHelper.OpenSession())
+                {
+                    using(var transacao = sessao.BeginTransaction())
+                    {
+                        sessao.Update(pessoa);
+                        transacao.Commit();
+                    }
+                }
 
-                return RedirectToAction("Index");
+                return RedirectToAction("Index", new { atualizado = "ok"});
             }
             catch
             {
