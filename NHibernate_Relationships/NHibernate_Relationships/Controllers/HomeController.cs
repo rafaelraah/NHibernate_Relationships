@@ -1,31 +1,39 @@
 ﻿using NHibernate;
 using NHibernate_Relationships.Models;
 using NHibernate_Relationships.Models.NHibernate;
+using System;
+using System.Collections.Generic;
 using System.Web.Mvc;
 
 namespace NHibernate_Relationships.Controllers
 {
     public class HomeController : Controller
     {
-        public object ISessionNHibernateHelper { get; private set; }
+        //public object ISessionNHibernateHelper { get; private set; }
 
         // GET: Home
         public ActionResult Index()
         {
             //Testes
+            IList<Pessoa> pessoas;
             using (ISession session = NHibernateHelper.OpenSession())
             {
                 var carros = session.QueryOver<Carro>().List();
-                var pessoas = session.QueryOver<Pessoa>().List();
+                var TiposInvestimentos = session.QueryOver<TipoInvestimento>().List();
+                pessoas = session.QueryOver<Pessoa>().List();
             }
 
-            return View();
+            return View(pessoas);
+
         }
 
         // GET: Home/Details/5
         public ActionResult Details(int id)
         {
-            return View();
+            Pessoa pessoa;
+            ISession session = NHibernateHelper.OpenSession();
+            pessoa = session.Get<Pessoa>(id);
+            return View(pessoa);
         }
 
         // GET: Home/Create
@@ -36,12 +44,18 @@ namespace NHibernate_Relationships.Controllers
 
         // POST: Home/Create
         [HttpPost]
-        public ActionResult Create(FormCollection collection)
+        public ActionResult Create(Pessoa pessoa)
         {
             try
             {
                 // TODO: Add insert logic here
-
+                using (ISession session = NHibernateHelper.OpenSession()) {
+                    using (ITransaction transaction = session.BeginTransaction())
+                    {
+                        session.Save(pessoa);
+                        transaction.Commit();
+                    }
+                }
                 return RedirectToAction("Index");
             }
             catch
@@ -75,7 +89,7 @@ namespace NHibernate_Relationships.Controllers
         // GET: Home/Delete/5
         public ActionResult Delete(int id)
         {
-            return View();
+            return View(NHibernateHelper.OpenSession().Get<Pessoa>(id));
         }
 
         // POST: Home/Delete/5
@@ -84,14 +98,52 @@ namespace NHibernate_Relationships.Controllers
         {
             try
             {
-                // TODO: Add delete logic here
-
-                return RedirectToAction("Index");
+                using (ISession session = NHibernateHelper.OpenSession())
+                {
+                    using (var transacao = session.BeginTransaction())
+                    {
+                        session.Delete(session.Get<Pessoa>(id));
+                        transacao.Commit();
+                    }
+                    return RedirectToAction("Index", new { excluido = "ok" });
+                }
             }
             catch
             {
                 return View();
             }
         }
+
+        public ActionResult Investir()
+        {
+            using (ISession session = NHibernateHelper.OpenSession())
+            {
+                ViewData["pessoas"] = session.QueryOver<Pessoa>().List();
+                ViewData["tiposInvestimentos"] = session.QueryOver<TipoInvestimento>().List();
+            }
+            return View();
+        }
+
+        [HttpPost]
+        public ActionResult Investir(Investimento investimento)
+        {
+            var formulario = Request.Form;
+            investimento.DataCriacao = DateTime.Now;
+
+            using(ISession session = NHibernateHelper.OpenSession())
+            {
+                investimento.Pessoa = session.Get<Pessoa>(Convert.ToInt32(formulario["pessoaSelecionada"]));
+                investimento.TipoInvestimento = session.Get<TipoInvestimento>(Convert.ToInt32(formulario["tipoInvestimentoSelecionado"]));
+
+                using (ITransaction transaction = session.BeginTransaction())
+                {
+                    session.Save(investimento);
+                    transaction.Commit();
+                }
+                return RedirectToAction("Index", new { investimento = "ok" });
+            }
+        }
+
+
     }
 }

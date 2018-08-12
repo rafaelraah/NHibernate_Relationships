@@ -8,7 +8,7 @@ namespace NHibernate_Relationships.Models.Map
 {
     public class PessoaMap : ClassMap<Pessoa>
     {
-        
+
         public PessoaMap()
         {
             Id(x => x.Id);
@@ -16,7 +16,11 @@ namespace NHibernate_Relationships.Models.Map
             HasMany(x => x.Carros)
             .Inverse()
             .Cascade.AllDeleteOrphan();
-         //   .KeyColumns.Add("IdPessoa", mapping => mapping.Name("Id")); ;
+            HasMany(x => x.Investimentos)
+            .Inverse()
+            .Cascade.AllDeleteOrphan();
+
+            //   .KeyColumns.Add("IdPessoa", mapping => mapping.Name("Id")); ;
         }
 
     }
